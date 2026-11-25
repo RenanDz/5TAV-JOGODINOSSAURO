@@ -2,13 +2,15 @@
 # Como usar:
 #   python treinar.py exp1 100
 #   (nome do experimento e quantas partidas jogar)
+#   python treinar.py exp1 10 tela
+#   (abre o Chrome pra ver aprendendo do zero, salva em resultados/exp1_ao_vivo)
 
 import csv
 import os
 import sys
 import time
 
-from agente import AgenteQ
+from agente import ACOES, AgenteQ
 from dino import JogoDino
 from estados import EXPERIMENTOS, nome_obstaculo
 
@@ -24,12 +26,18 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
     total_partidas = int(sys.argv[2])
 
+# "tela" abre o Chrome pra ver ele aprendendo do zero (usado na apresentacao).
+# Salva em outra pasta pra nao apagar o treino de verdade.
+modo_tela = "tela" in sys.argv
+
 pegar_estado = EXPERIMENTOS[experimento]
 pasta = os.path.join("resultados", experimento)
+if modo_tela:
+    pasta = os.path.join("resultados", experimento + "_ao_vivo")
 os.makedirs(pasta, exist_ok=True)
 
 agente = AgenteQ()
-jogo = JogoDino(mostrar_tela=False)
+jogo = JogoDino(mostrar_tela=modo_tela)
 
 arquivo = open(os.path.join(pasta, "treino.csv"), "w", newline="")
 csv_treino = csv.writer(arquivo)
@@ -75,6 +83,13 @@ for partida in range(1, total_partidas + 1):
             pulos += 1
         estado = novo_estado
 
+        if modo_tela:
+            notas = agente.notas(estado)
+            jogo.mostrar_texto(f"TREINANDO  partida {partida}  |  estados aprendidos: {len(agente.q)}\n"
+                               f"estado {estado}  distancia: {info['distancia']:.0f} px\n"
+                               f"nota nada: {notas[0]:.1f}  nota pular: {notas[1]:.1f}\n"
+                               f"acao: {ACOES[acao].upper()}")
+
     if info["bateu"]:
         bateu_em = nome_obstaculo(info)
     else:
@@ -88,6 +103,8 @@ for partida in range(1, total_partidas + 1):
 
     agente.epsilon = agente.epsilon * 0.95
     agente.salvar(os.path.join(pasta, "q_table.json"))
+    if modo_tela:
+        time.sleep(1.5)  # da tempo de ver onde ele bateu
     jogo.reiniciar()
 
 arquivo.close()

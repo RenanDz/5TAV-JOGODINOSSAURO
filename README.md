@@ -17,6 +17,7 @@ pip install -r requirements.txt
 python treinar.py exp1 60        # treina o experimento 1 por 60 partidas (sem abrir janela)
 python jogar.py exp1 10 teste    # testa a IA treinada em 10 partidas e salva o resultado
 python jogar.py exp1             # abre o Chrome e mostra a IA jogando
+python treinar.py exp1 10 tela   # abre o Chrome e mostra a IA aprendendo do zero
 python grafico.py                # gera os gráficos na pasta graficos/
 ```
 
